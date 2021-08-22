@@ -1,5 +1,9 @@
 # Map of IUCN Red List of Ecosystem assessments
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5234108.svg)](https://doi.org/10.5281/zenodo.5234108)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Project homepage](http://ec2-13-236-200-14.ap-southeast-2.compute.amazonaws.com:3838/RLEassessmentsMap/)
+
 
 Data compiled from the [IUCN Red List of Ecosystem webpage](https://iucnrle.org/resources/published-assessments/) the [IUCN Red List of Ecosystem database](https://assessments.iucnrle.org) and other sources by José R. Ferrer-Paris (UNSW), Lila García, Arlene Cardozo-Urdaneta and Irene Zager (Provita). Code written by José R. Ferrer-Paris (UNSW).
 
