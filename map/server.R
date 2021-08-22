@@ -5,6 +5,7 @@ library(dplyr)
 library(sf)
 require(DT)
 require(tidyr)
+
 options(dplyr.summarise.inform = FALSE)
 
 function(input, output) {
@@ -18,11 +19,11 @@ function(input, output) {
     ct_labels <- sprintf("<strong>%s</strong>",
                          slc.countries$NAME) %>%
         lapply(htmltools::HTML)
-    
+
     bins <- c(1, 2, 5, 10, Inf)
     #palN <- colorBin("RdPu", domain = slc.countries$n_assessments, bins = bins)
     palF <- colorFactor("YlOrBr", domain = slc.countries$n_asm)
-    
+
     catIcons <- icons(
         iconUrl = sprintf("%s.png",tolower(asm.points$overall_risk_category)),
         iconWidth = 25, iconHeight = 25
@@ -43,7 +44,7 @@ function(input, output) {
                 overlayGroups = c("Assessments per country", "Strategic assessments"),
                 options = layersControlOptions(collapsed = FALSE),
                 position = "topleft"
-            ) %>% 
+            ) %>%
             addLegend(pal = palF, values = slc.countries$n_asm,opacity = 0.45, title = "Valid IUCN RLE assmnts.",
                       na.label = "(other protocols)",
                       position = "topleft", group="Assessments per country") %>%
@@ -70,12 +71,12 @@ function(input, output) {
     },caption=sprintf('List of ecosystem assessments in %s',data_of_click$Country), options = list(lengthChange = FALSE,pageLength=-1,paging=FALSE,info=FALSE,searching=FALSE),server=FALSE)
 
     # output detailed table
-    
+
     output$table <- renderDT({
-         dts <- asm.countries %>% filter( 
+         dts <- asm.countries %>% filter(
              is.null(input$country) | input$country %in% "All" | iso2 %in% input$country,
-                     switch(input$protocol,all={TRUE}, 
-                        RLE2={assessment_protocol_code %in% rle.asms}, 
+                     switch(input$protocol,all={TRUE},
+                        RLE2={assessment_protocol_code %in% rle.asms},
                         other={!(assessment_protocol_code %in% rle.asms)})
                     ) %>% distinct(name,.keep_all = TRUE) %>%
                 transmute(Assessment=name,Reference=ref_code,Protocol=assessment_protocol_code)

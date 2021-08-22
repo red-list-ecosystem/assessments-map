@@ -1,5 +1,6 @@
 library(leaflet)
 require(DT)
+require(tidyr)
 
 navbarPage("Ecosystem assessments", id="nav",
 
