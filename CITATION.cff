@@ -5,7 +5,7 @@ authors:
     given-names: "José R."
     country: "AU"
     orcid: https://orcid.org/0000-0002-9554-3395
-title: "Shiny App: Interactive Map of IUCN Red List of Ecosystem assessments"
+title: "Code and data for: Interactive Map of IUCN Red List of Ecosystem assessments"
 identifiers:
   - description: This software provides an update of the map published in
     type: doi
