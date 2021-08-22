@@ -1,4 +1,5 @@
 library(leaflet)
+require(DT)
 
 navbarPage("Ecosystem assessments", id="nav",
 
