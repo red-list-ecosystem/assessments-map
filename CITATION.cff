@@ -1,0 +1,10 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Ferrer-Paris"
+    given-names: "José R."
+    country: "AU"
+    orcid: https://orcid.org/0000-0002-9554-3395
+title: "Shiny App: Interactive Map of IUCN Red List of Ecosystem assessments"
+version: v1.0
+date-released: 2021-08-20
