@@ -2,11 +2,26 @@ library(dplyr)
 library(magrittr)
 options(dplyr.summarise.inform = FALSE)
 
-load("assmntdata.rda")
-slc.countries %<>% mutate(NAME=if_else(ISO2 %in% "MM","Myanmar",NAME))
-asm.points$ocat <- factor(asm.points$overall_risk_category,levels=c("CO","CR","EN", "VU", "NT", "LC"))
-slc.countries$n_asm <- cut(slc.countries$n_assessments,breaks=c(0, 1, 4, 10, Inf),labels=c("1","2-4","5-10",">10"))
 
+load("spatialdata.rda")
+asm.national %<>% mutate(NAME=if_else(ISO2 %in% "MM","Myanmar",NAME))
+
+asm.national %<>%
+  mutate(protocol=if_else(asm.national$IUCN==0,"Other","IUCN RLE (v2)"),
+         colorgrp = if_else(asm.national$IUCN==0,1,
+           ifelse(included_ecosystems %in% 'multiple biomes',3,2))) %>%
+  mutate(colorgrp=factor(colorgrp,labels=c("Other", "IUCN RLE (v2) / single biome", "IUCN RLE (v2) / multiple biomes")))
+
+load("tabledata.rda")
+slc.countries <-  asm.list %>% distinct(iso2,country_name)
 rle.asms <- c("IUCN RLE v2.0","IUCN RLE v2.1","IUCN RLE v2.2")
 
-## pal <- colorFactor(c("black","red", "orange", "darkgreen", "green",  "yellow"), domain = c("CO","CR","EN", "LC", "NT", "VU"))
+refs <- ref.list %>%
+  transmute(ref_code,
+    reference=sprintf("%s %s %s %s %s",
+      if_else(is.na(author_list), '',
+        if_else(nchar(author_list)<20,author_list, paste0(substr(author_list,0,17),'...'))),
+      if_else(is.na(date),'',paste0("(",date,")")),
+      if_else(is.na(title),'',paste0(title,'.')),
+      if_else(is.na(container_title),'',paste0(container_title,'.')),
+      if_else(is.na(doi),'',paste0('http://doi.org/',doi))))

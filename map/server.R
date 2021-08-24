@@ -8,78 +8,119 @@ require(tidyr)
 
 options(dplyr.summarise.inform = FALSE)
 
-function(input, output) {
+function(input, output, session) {
 
-    # create a reactive value that will store the click position
-    data_of_click <- reactiveValues(clickedMarker=NULL)
-    #labels
-    my_labels = sprintf("<strong>%s</strong><br/>%s<br/>Category: <strong>%s</strong>",
-                        asm.points$eco_name, asm.points$name, asm.points$overall_risk_category ) %>%
-        lapply(htmltools::HTML)
-    ct_labels <- sprintf("<strong>%s</strong>",
-                         slc.countries$NAME) %>%
-        lapply(htmltools::HTML)
+  #########
+  ## MAP section
 
-    bins <- c(1, 2, 5, 10, Inf)
-    #palN <- colorBin("RdPu", domain = slc.countries$n_assessments, bins = bins)
-    palF <- colorFactor("YlOrBr", domain = slc.countries$n_asm)
+  # continental labels
+  ct_labels <- sprintf("<p><strong>%s</strong><br/> Protocol: %s <br/> Assessment target: %s <br/> Reference: %s <br/>(ID: %s)</p>",
+                       asm.continental$name, asm.continental$assessment_protocol_code,
+                       asm.continental$included_ecosystems,asm.continental$ref_code,
+                       asm.continental$asm_id) %>%
+  lapply(htmltools::HTML)
+  # national labels
+  nt_labels <- sprintf("<p><strong>%s</strong><br/> Protocol: %s <br/> Assessment target: %s </p>",
+                       asm.national$NAME, asm.national$protocol,asm.national$included_ecosystems ) %>%
+    lapply(htmltools::HTML)
+  nt_pal <- colorFactor("YlOrBr", domain = asm.national$colorgrp)
+  # national labels
+  sn_labels <- sprintf("<p><strong>%s</strong><br/> Protocol: %s <br/> Assessment target: %s </p>",
+                       asm.subnational$name, asm.subnational$assessment_protocol_code,asm.subnational$included_ecosystems ) %>%
+    lapply(htmltools::HTML)
+  # strategic labels and icons
+  st_labels <- sprintf("<strong>%s</strong><br/>%s<br/>Category: <strong>%s</strong>",
+                      asm.strategic$eco_name, asm.strategic$name, asm.strategic$overall_risk_category ) %>%
+    lapply(htmltools::HTML)
+  st_icons <- icons(
+    iconUrl = sprintf("%s.png",tolower(asm.strategic$overall_risk_category)),
+    iconWidth = 25, iconHeight = 25
+  )
+  st_cluster <- markerClusterOptions(iconCreateFunction=JS("function (cluster) {
+  var childCount = cluster.getChildCount();
+  if (childCount < 5) {
+    c = 'rgba(181, 126, 140, 0.6);'
+  } else if (childCount < 10) {
+    c = 'rgba(140, 184, 112, 0.6);'
+  } else {
+    c = 'rgba(141, 128, 183, 0.6);'
+  }
+  return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', className: 'marker-cluster', iconSize: new L.Point(40, 40) });
 
-    catIcons <- icons(
-        iconUrl = sprintf("%s.png",tolower(asm.points$overall_risk_category)),
-        iconWidth = 25, iconHeight = 25
-    )
+  }"))
 
-    # Leaflet map
-    output$map <- renderLeaflet({
-        leaflet() %>%
-            # Esri.OceanBasemap, CartoDB.Voyager Stamen.Toner  Stamen.TonerLite Esri.WorldStreetMap  Esri.WorldGrayCanvas
-            addProviderTiles(providers$CartoDB.Positron) %>%
-            setView(lng = 20, lat = 0, zoom = 2) %>%
-            addPolygons(data = slc.countries, layerId= ~ISO2, fillColor = ~palF(n_asm),
-                        highlightOptions = highlightOptions(weight = 2, color = 'black'),
-                        color = 'blue', weight = 0.4, fillOpacity = 0.45,label=ct_labels,group="Assessments per country") %>%
-            #addCircleMarkers(data = asm.points, layerId= ~eco_id,color = ~pal(ocat), label=my_labels)
-            # Layers control
-            addLayersControl(
-                overlayGroups = c("Assessments per country", "Strategic assessments"),
-                options = layersControlOptions(collapsed = FALSE),
-                position = "topleft"
-            ) %>%
-            addLegend(pal = palF, values = slc.countries$n_asm,opacity = 0.45, title = "Valid IUCN RLE assmnts.",
-                      na.label = "(other protocols)",
-                      position = "topleft", group="Assessments per country") %>%
-            addMarkers(data = asm.points, layerId= ~eco_id,icon = catIcons, label=my_labels,group="Strategic assessments") %>%
-            hideGroup("Strategic assessments")
-    })
 
-    # store the click
-    observeEvent(input$map_shape_click,{
-        data_of_click$clickedMarker <- input$map_shape_click
-        data_of_click$Country <- slc.countries %>% filter(ISO2 %in% input$map_shape_click$id) %>% pull(NAME)
-    })
+  # Leaflet map
+  output$map <- renderLeaflet({
+      leaflet() %>%
+          addProviderTiles(providers$CartoDB.Positron) %>%
+          setView(lng = 20, lat = 0, zoom = 2) %>%
+      addLayersControl(
+        overlayGroups = c("Systematic assessments - continental", "Systematic assessments - national", "Systematic assessments - subnational","Strategic assessments"),
+        options = layersControlOptions(collapsed = FALSE),
+        position = "topleft"
+      )  %>%
+      addPolygons(data = asm.national, layerId= ~NAME,
+                  fillColor = ~nt_pal(colorgrp),
+                  highlightOptions = highlightOptions(weight = 2, color = 'black'),
+                  color = 'black', weight = 0.4, fillOpacity = 0.45, label=nt_labels,
+                  group="Systematic assessments - national") %>%
+      addPolygons(data = asm.continental, layerId= ~asm_id,
+                  fillColor = 'grey',
+                  highlightOptions = highlightOptions(weight = 2, color = 'black'),
+                  color = 'blue', weight = 0.4, fillOpacity = 0.45, label=ct_labels,
+                  group="Systematic assessments - continental") %>%
+      addMarkers(data = asm.strategic, layerId= ~eco_id,icon = st_icons,
+                 label=st_labels,
+                 clusterOptions = st_cluster,
+                 group="Strategic assessments") %>%
+      addMarkers(data = asm.subnational, layerId= ~asm_id,
+                 label=sn_labels,
+                 group="Systematic assessments - subnational") %>%
+      hideGroup("Strategic assessments") %>%
+      hideGroup("Systematic assessments - continental") %>%
+      hideGroup("Systematic assessments - subnational")
+  })
 
-    # output summary table
-    output$totals <- renderDT({
-        my_place=data_of_click$clickedMarker$id
+#########
+## TABLE section
+# output detailed table
+  output$table <- renderDT({
+    dts <- asm.list %>%
+      filter(
+        is.null(input$country) | input$country %in% "All" | iso2 %in% input$country,
+        switch(input$protocol,all={TRUE},
+               RLE2={assessment_protocol_code %in% rle.asms},
+               other={!(assessment_protocol_code %in% rle.asms)}),
+        switch(input$target,all={TRUE},
+               efg={included_ecosystems %in% "single functional group"},
+               single={included_ecosystems %in% "single biome"},
+               related={included_ecosystems %in% "few related biomes"},
+               multiple={included_ecosystems %in% "multiple biomes"}),
+        switch(input$asmtype,all={TRUE},
+               systematic={!(asm_type %in% "Strategic")},
+               continental={asm_type %in% "Systematic (Continental)"},
+               national={asm_type %in% "Systematic"},
+               subnational={asm_type %in% "Systematic (Subnational)"},
+               strategic={asm_type %in% "Strategic"})
+      ) %>% distinct(name,.keep_all = TRUE) %>%
+      transmute(Assessment=name,Reference=ref_code,Protocol=assessment_protocol_code)
+    DT::datatable(dts)
+      })
 
-        if(is.null(my_place)) {
 
-        } else {
-            dts <- asm.countries %>% filter(iso2==my_place) %>% mutate(Protocol=if_else(grepl("IUCN RLE v2",assessment_protocol_code),"IUCN RLE (v2)","Other"),Type=asm_type) %>% group_by(Type,Protocol) %>% summarise(total=n()) %>% pivot_wider(id_cols=Type,names_from=Protocol,values_from=total)
-            #dts <- asm.countries %>% filter(iso2==my_place) %>% transmute(Protocol=assessment_protocol_code,Type=asm_type) %>% table
-        }
-    },caption=sprintf('List of ecosystem assessments in %s',data_of_click$Country), options = list(lengthChange = FALSE,pageLength=-1,paging=FALSE,info=FALSE,searching=FALSE),server=FALSE)
+  observeEvent(input$table_cell_clicked, {
+    info = input$table_cell_clicked
+    # do nothing if not clicked yet, or the clicked cell is not in the 1st column
+    if (is.null(info$value) || info$col != 2) return()
+    updateTextInput(session, 'x2', value = info$value)
+  })
 
-    # output detailed table
-
-    output$table <- renderDT({
-         dts <- asm.countries %>% filter(
-             is.null(input$country) | input$country %in% "All" | iso2 %in% input$country,
-                     switch(input$protocol,all={TRUE},
-                        RLE2={assessment_protocol_code %in% rle.asms},
-                        other={!(assessment_protocol_code %in% rle.asms)})
-                    ) %>% distinct(name,.keep_all = TRUE) %>%
-                transmute(Assessment=name,Reference=ref_code,Protocol=assessment_protocol_code)
-            DT::datatable(dts)
-        })
+  # highlight the point of the selected cell
+  output$ref = renderText({
+    id = input$x2
+    if (id != '') {
+      refs %>% filter(ref_code %in% id) %>% pull(reference)
+    }
+  })
 }

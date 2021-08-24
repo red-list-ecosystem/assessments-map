@@ -19,12 +19,7 @@ navbarPage("Ecosystem assessments", id="nav",
         width = 430, height = "auto",
 
         tags$a(href='http://iucnrle.org', tags$img(src='logo.png', width = 300)),
-        h2("Assessments by country"),
-        DTOutput("totals"),
-        hr(),
-        div(
-          'Data compiled from the ', tags$a(href='https://iucnrle.org/resources/published-assessments/',tags$em('IUCN Red List of Ecosystem webpage')), ' the ',tags$a(href='https://assessments.iucnrle.org',tags$em('IUCN Red List of Ecosystem database')),'and other sources by José R. Ferrer-Paris (UNSW), Lila García, Arlene Cardozo-Urdaneta and Irene Zager (Provita).'
-        )
+
       ),
 
 
@@ -38,16 +33,36 @@ navbarPage("Ecosystem assessments", id="nav",
   tabPanel("List of assessments",
     fluidRow(
       column(3,
-             selectInput("country", "Countries and territories", c("All"="All", structure(slc.countries %>% pull(ISO2), names=slc.countries %>% pull(NAME))), multiple=FALSE),
-             radioButtons("protocol", "Assessment protocols:",
-                          c("IUCN RLE (v2)" = "RLE2",
-                            "Other" = "other",
-                            "All" = "all"))
-      ),
-      column(9,
-        DTOutput("table")
-      )
+           selectInput("country", "Countries and territories",
+                       c("All"="All",
+                         structure(slc.countries$iso2,
+                                   names=slc.countries$country_name)), multiple=FALSE),
+           radioButtons("protocol", "Assessment protocols:",
+                        c("IUCN RLE (v2)" = "RLE2",
+                          "Other" = "other",
+                          "All" = "all")),
+           radioButtons("target", "Assessment target:",
+                        c("Single ecosystem" = "efg",
+                          "Multiple (same biome)" = "single",
+                          "Multiple (related biomes)" = "related",
+                          "Multiple (multiple biomes)" = "multiple",
+                          "All" = "all"),selected = "all"),
+           radioButtons("asmtype", "Assessment type:",
+                        c("All systematic" = "systematic",
+                          "Systematic - Continental" = "continental",
+                          "Systematic - National" = "national",
+                          "Systematic - Subnational" = "subnational",
+                          "Strategic" = "strategic",
+                          "All" = "all"
+                          ),selected = "all")
     ),
+    column(9,
+      DTOutput("table")
+    )
+  ),
+  fluidRow(hr(),h3("References"),
+    column(6,p("Click on a citation in the table above to show the reference information."),textInput('x2', 'Showing reference info for'),
+         textOutput("ref"))),
 
   conditionalPanel("false", icon("crosshair"))
   )
