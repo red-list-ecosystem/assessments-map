@@ -54,11 +54,11 @@ function(input, output, session) {
   output$map <- renderLeaflet({
       leaflet() %>%
           addProviderTiles(providers$CartoDB.Positron) %>%
-          setView(lng = 20, lat = 0, zoom = 2) %>%
+          setView(lng = 40, lat = 10, zoom = 2) %>%
       addLayersControl(
         overlayGroups = c("Systematic assessments - continental", "Systematic assessments - national", "Systematic assessments - subnational","Strategic assessments"),
         options = layersControlOptions(collapsed = FALSE),
-        position = "topleft"
+        position = "bottomleft"
       )  %>%
       addPolygons(data = asm.national, layerId= ~NAME,
                   fillColor = ~nt_pal(colorgrp),
@@ -72,13 +72,13 @@ function(input, output, session) {
                   group="Systematic assessments - continental") %>%
       addMarkers(data = asm.strategic, layerId= ~eco_id,icon = st_icons,
                  label=st_labels,
-                 clusterOptions = st_cluster,
+                 # clusterOptions = st_cluster, # not convinced
                  group="Strategic assessments") %>%
       addMarkers(data = asm.subnational, layerId= ~asm_id,
                  label=sn_labels,
                  group="Systematic assessments - subnational") %>%
-      hideGroup("Strategic assessments") %>%
       hideGroup("Systematic assessments - continental") %>%
+      # hideGroup("Strategic assessments") %>%
       hideGroup("Systematic assessments - subnational")
   })
 

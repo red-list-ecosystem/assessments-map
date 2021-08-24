@@ -19,13 +19,41 @@ navbarPage("Ecosystem assessments", id="nav",
         width = 430, height = "auto",
 
         tags$a(href='http://iucnrle.org', tags$img(src='logo.png', width = 300)),
+        h2("Systematic assessments"),
+        p("Simultaneous assessment of several ecosystems in a large region using similar indicators and methods."),
+        h3("Continental"),
+        p("The continental assessments of marine, freshwater and terrestrial habitats in Europe follows a modified version of the IUCN RLE protocol.",
+        br(),"The continental assessments in the Americas follows the IUCN RLE protocol but is restricted to forest vegetation (Few related biomes)."),
+        h3("National"),
+        p("Three national assessments include marine and terrestrial ecosystems/habitats. The rest are restricted to terrestrial ecosystems.",
+        br(),"Two national assessments are restricted to forest ecosystems.",br(),"Six national assessments do not follow the IUCN RLE protocol."),
+        h3("Subnational"),
+        p("Four assessments are restricted to regions within one country.",
+          br(),"One assessments focuses on a single region (Congo Basin) extending to multiple countries."),
+        h2("Strategic assessments"),
+        p("Detailed assessment focused on a single region and one or few related ecosystems.",br(),"Might extent to two or more countries."),
 
-      ),
-
-
-
-      tags$div(id="cite",
-        'Polygon layer based on ', tags$a(href='http://thematicmapping.org/downloads/world_borders.php',tags$em('TM World Borders v0.3'))
+        hr(),
+        div(
+          'Data compiled from the ',
+          tags$a(href='https://assessments.iucnrle.org',
+                 tags$em('IUCN Red List of Ecosystem database')),
+          ', the ',
+          tags$a(href='http://iucnrle.org',
+                 tags$em('IUCN Red List of Ecosystem webpage')),
+          ', the ',
+          tags$a(href='http://doi.org/10.1111/conl.12666',
+                 tags$em('Bland et al. (2019)')),
+          'and other sources by José R. Ferrer-Paris (UNSW), Lila García, Arlene Cardozo-Urdaneta and Irene Zager (Provita).'
+        ),
+        tags$div(id="cite",
+          'Polygons based on ',
+          tags$a(href='http://thematicmapping.org/downloads/world_borders.php',tags$em('TM World Borders v0.3')),
+          ", ",
+          tags$a(href='https://www.marineregions.org/',tags$em('Marine boundaries and Exclusive Economical Zones')),
+          " and the",
+          tags$a(href='https://forum.eionet.europa.eu/european-red-list-habitats/',tags$em('European Red List of Habitats')),
+        )
       )
     )
   ),
